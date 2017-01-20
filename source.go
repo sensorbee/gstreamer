@@ -110,6 +110,7 @@ func (s *Source) Stop(ctx *core.Context) error {
 	return nil
 }
 
+// RawSourceOptions is options for gst_raw_video source.
 type RawSourceOptions struct {
 	// Pipeline contains a pipeline that passed to gst-launch-1.0. For example,
 	//
@@ -118,16 +119,22 @@ type RawSourceOptions struct {
 	// The pipeline must end with appsink.
 	Pipeline string `bql:",required"`
 
-	// required when format isn't jpeg.
+	// Width is the width of frames captured by the pipeline. When the format is
+	// jpeg, the source will automatically detect the size of frames. Otherwise,
+	// this parameter is required.
 	Width int
-	// required when format isn't jpeg.
+
+	// Height is the height of frames captured by the pipeline. When the format
+	// is jpeg, the source will automatically detect the size of frames.
+	// Otherwise, this parameter is required.
 	Height int
 
 	// Format specifies the format of frame images retrieved from the video
 	// source. It supports raw or jpeg. The default value is jpeg.
 	Format string `bql:",required"`
 
-	// required when format is raw
+	// ColorModel is the color model (e.g. RGB, BGR, ARGB, etc) of frames. This
+	// is only required when the format is raw.
 	ColorModel string
 }
 
@@ -151,6 +158,16 @@ func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map)
 	opt := RawSourceOptions{}
 	if err := data.Decode(params, &opt); err != nil {
 		return nil, err
+	}
+
+	if opt.Format == "raw" {
+		// TODO: report these errors at once.
+		if opt.Width == 0 || opt.Height == 0 {
+			return nil, errors.New("width and heights must bw specified when the format is raw")
+		}
+		if opt.ColorModel == "" {
+			return nil, errors.New("color_model is required when the format is raw")
+		}
 	}
 
 	s := &Source{
