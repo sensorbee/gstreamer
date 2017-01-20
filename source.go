@@ -12,7 +12,9 @@ const char* ErrorMessage(GError *err) {
 */
 import "C"
 import (
+	"bytes"
 	"errors"
+	"image/jpeg"
 	"time"
 	"unsafe"
 
@@ -77,6 +79,18 @@ func (s *Source) GenerateStream(ctx *core.Context, w core.Writer) error {
 		img := make(data.Blob, int(C.GetFrameSize(&info)))
 		C.CopyFrame(unsafe.Pointer(&img[0]), &info)
 		C.ReleaseFrame(buf, &info)
+
+		// When the format is jpeg, this source automatically detects its width
+		// and hights. It assumes that frames from the camera have the same size.
+		if s.format == "jpeg" && (s.width == 0 || s.height == 0) {
+			conf, err := jpeg.DecodeConfig(bytes.NewReader([]byte(img)))
+			if err != nil {
+				return err
+			}
+			s.width = conf.Width
+			s.height = conf.Height
+		}
+
 		t := core.NewTuple(data.Map{
 			"image":  img,
 			"width":  data.Int(s.width),
