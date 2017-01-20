@@ -8,4 +8,6 @@ import (
 func init() {
 	bql.RegisterGlobalSourceCreator("gst_raw_video",
 		bql.SourceCreatorFunc(gstreamer.CreateRawSource))
+	bql.RegisterGlobalSourceCreator("gst_nvcamera",
+		bql.SourceCreatorFunc(gstreamer.CreateNVCameraSource))
 }
