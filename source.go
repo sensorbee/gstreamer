@@ -140,6 +140,7 @@ type RawSourceOptions struct {
 	ColorModel string
 }
 
+// CreateRawSource creates a new gst_raw_video source.
 func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map) (core.Source, error) {
 	s, err := createRawSource(ioParams, params)
 	if err != nil {
