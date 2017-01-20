@@ -27,6 +27,7 @@ func init() {
 
 // Source is a video source using GStreamer.
 type Source struct {
+	ioParams      *bql.IOParams
 	pipeline      string
 	width, height int
 	format        string
@@ -39,9 +40,9 @@ func (s *Source) GenerateStream(ctx *core.Context, w core.Writer) error {
 		pipeline := C.CString(s.pipeline)
 		defer C.free(unsafe.Pointer(pipeline))
 		if e := C.CreateAndStartSource(pipeline, &src); e != nil {
-			ctx.Log().WithField("pipeline", s.pipeline).Error("Cannot create a pipeline")
 			err := errors.New(C.GoString(C.ErrorMessage(e)))
 			C.g_error_free(e)
+			ctx.ErrLog(err).WithField("pipeline", s.pipeline).Error("Cannot create a pipeline")
 			return err
 		}
 		return nil
@@ -52,6 +53,12 @@ func (s *Source) GenerateStream(ctx *core.Context, w core.Writer) error {
 	defer func() {
 		C.DestroySource(src)
 	}()
+
+	ctx.Log().WithFields(map[string]interface{}{
+		"pipeline":  s.pipeline,
+		"node_type": s.ioParams.TypeName,
+		"node_name": s.ioParams.Name,
+	}).Info("Start streaming")
 
 	// It seems pulling frames before the main loop starts ends up with a dead-lock.
 	// This could sometimes fail but should be sufficient for most cases.
@@ -133,6 +140,7 @@ func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map)
 	}
 
 	s := &Source{
+		ioParams:   ioParams,
 		pipeline:   opt.Pipeline,
 		width:      opt.Width,
 		height:     opt.Height,
