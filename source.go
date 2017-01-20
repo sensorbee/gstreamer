@@ -140,8 +140,15 @@ type RawSourceOptions struct {
 	ColorModel string
 }
 
-
 func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map) (core.Source, error) {
+	s, err := createRawSource(ioParams, params)
+	if err != nil {
+		return nil, err
+	}
+	return core.ImplementSourceStop(s), nil
+}
+
+func createRawSource(ioParams *bql.IOParams, params data.Map) (*Source, error) {
 	opt := RawSourceOptions{}
 	if err := data.Decode(params, &opt); err != nil {
 		return nil, err

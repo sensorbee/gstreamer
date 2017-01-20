@@ -38,14 +38,9 @@ func TestCreateRawSource(t *testing.T) {
 					t.Fatal("can't convert a map:", c)
 				}
 
-				src, err := CreateRawSource(core.NewContext(nil), &bql.IOParams{}, m)
+				s, err := createRawSource(&bql.IOParams{}, m)
 				if err != nil {
 					t.Fatal("creating a source failed:", err)
-				}
-
-				s, ok := src.(*Source)
-				if !ok {
-					t.Fatal("can't convert src")
 				}
 
 				if s.pipeline != c["pipeline"].(string) {
