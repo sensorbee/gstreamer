@@ -14,7 +14,9 @@ import "C"
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image/jpeg"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -160,14 +162,23 @@ func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map)
 		return nil, err
 	}
 
-	if opt.Format == "raw" {
-		// TODO: report these errors at once.
+	// TODO: report these validation errors at once.
+	if ps := strings.Split(opt.Pipeline, "!"); len(ps) == 0 ||
+		!strings.HasPrefix(strings.TrimSpace(ps[len(ps)-1]), "appsink") {
+		return nil, errors.New("pipeline must end with appsink")
+	}
+
+	switch opt.Format {
+	case "raw":
 		if opt.Width == 0 || opt.Height == 0 {
 			return nil, errors.New("width and heights must bw specified when the format is raw")
 		}
 		if opt.ColorModel == "" {
 			return nil, errors.New("color_model is required when the format is raw")
 		}
+	case "jpeg":
+	default:
+		return nil, fmt.Errorf("unsupported format: %v", opt.Format)
 	}
 
 	s := &Source{
