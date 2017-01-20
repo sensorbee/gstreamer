@@ -97,7 +97,8 @@ GError *CreateAndStartSource(const char *pipeline_str, Source **src) {
 }
 
 void DestroySource(Source *s) {
-    if (!s) return;
+    // This implementation is only used by source.go and it doesn't call this
+    // function concurrently. So, this function doesn't acquire locks.
     if (s->thread_started) {
         g_main_loop_quit(s->loop);
         pthread_join(s->streaming_thread, NULL);
