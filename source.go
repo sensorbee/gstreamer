@@ -140,21 +140,6 @@ type RawSourceOptions struct {
 	ColorModel string
 }
 
-type SourceOptions struct {
-	Width  int
-	Height int
-
-	// Format specifies the format of frame images retrieved from the video
-	// source. It supports raw or jpeg. The default value is jpeg.
-	Format string
-
-	// ColorModel represents the RGB layout of raw format. This option is only
-	// referred when format is raw.
-	ColorModel string
-
-	// Framerate is the f
-	Framerate string
-}
 
 func CreateRawSource(ctx *core.Context, ioParams *bql.IOParams, params data.Map) (core.Source, error) {
 	opt := RawSourceOptions{}
