@@ -80,6 +80,7 @@ GError *CreateAndStartSource(const char *pipeline_str, Source **src) {
         return err;
     }
 
+    // FIXME: creating multiple sources will create appsink1 or more.
     s->sink = (GstAppSink*) gst_bin_get_by_name(GST_BIN(s->pipeline), "appsink0");
     if (!s->sink) {
         DestroySource(s);
