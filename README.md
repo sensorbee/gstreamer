@@ -164,7 +164,7 @@ The `gst_raw_video` source allow a user to use custom GStreamer pipeline.
 * `pipeline`
 * `format`
 
-When `format` is `raw`, it has additional requirement parameters:
+When `format` is `raw`, it has additional required parameters:
 
 * `color_model`
 * `width`
